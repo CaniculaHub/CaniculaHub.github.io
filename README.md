@@ -1,4 +1,4 @@
-# BY Blog
+#  Blog
 
 > 下面是博客的搭建教程，这个教程修改自 [Hux](https://github.com/Huxpro/huxpro.github.io) 。
 > 
@@ -10,3 +10,14 @@
 2. 感谢 Jekyll、Github Pages 和 Bootstrap!
 
 
+---
+layout:     post   				 # 使用的布局（不需要改）
+title:       	         # 标题 
+subtitle:  		 #副标题
+date:       				 # 时间
+author:     		    # 作者
+header-img: 	         #这篇文章标题背景图片
+catalog: true 					 # 是否归档
+tags:					         #标签
+    - 
+---
