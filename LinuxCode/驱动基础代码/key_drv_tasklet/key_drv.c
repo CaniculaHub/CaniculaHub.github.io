@@ -31,10 +31,28 @@ struct key_desc{
 	struct key_event event;
 	wait_queue_head_t  wq_head;
 	int key_state; //表示是否有数据
+	struct fasync_struct *faysnc;
+	struct tasklet_struct mytasklet;
 	
 };
 
 struct key_desc *key_dev;
+
+
+void key_tasklet_half_irq(unsigned long data)
+{
+	printk("-------%s-------------\n", __FUNCTION__);
+	// 表示有数据,需要去唤醒整个进程/等待队列
+	wake_up_interruptible(&key_dev->wq_head);
+	//同时设置标志位
+	key_dev->key_state  = 1;
+
+	//发送信号
+
+	kill_fasync(&key_dev->faysnc, SIGIO, POLLIN);
+	
+}
+
 
 irqreturn_t key_irq_handler(int irqno, void *devid)
 {
@@ -42,7 +60,6 @@ irqreturn_t key_irq_handler(int irqno, void *devid)
 
 	//读取数据寄存器
 	int value = readl(key_dev->reg_base + 4) & (1<<2);
-
 	if(value){ // 抬起
 		printk("key3 up\n");
 		key_dev->event.code = KEY_ENTER;
@@ -53,10 +70,8 @@ irqreturn_t key_irq_handler(int irqno, void *devid)
 		key_dev->event.code = KEY_ENTER;
 		key_dev->event.value = 1;
 	}
-	// 表示有数据,需要去唤醒整个进程/等待队列
-	wake_up_interruptible(&key_dev->wq_head);
-	//同时设置标志位
-	key_dev->key_state  = 1;
+	// 启动下半步
+	tasklet_schedule(&key_dev->mytasklet);
 	
 	return IRQ_HANDLED;
 }
@@ -144,12 +159,20 @@ unsigned int key_drv_poll(struct file *filp, struct poll_table_struct *pts)
 	return mask;
 }
 
+int key_drv_fasync(int fd, struct file *filp, int on)
+{
+	//只需要调用一个函数记录信号该发送给谁
+	return fasync_helper(fd, filp, on,  &key_dev->faysnc);
+
+}
+
 const struct file_operations key_fops = {
 	.open = key_drv_open,
 	.read = key_drv_read,
 	.write = key_drv_write,
 	.release = key_drv_close,
 	.poll = key_drv_poll,
+	.fasync = key_drv_fasync,
 	
 };
 
@@ -186,14 +209,20 @@ static int __init key_drv_init(void)
 
 	// 初始化等待队列头
 	init_waitqueue_head(&key_dev->wq_head);
+
+	//初始化tasklet
+	tasklet_init(&key_dev->mytasklet, key_tasklet_half_irq, 45);
 	
 	
 	return 0;
-}
+}	
 
 
 static void __exit key_drv_exit(void)
 {
+
+	tasklet_kill(&key_dev->mytasklet);
+	
 	iounmap(key_dev->reg_base);
 	free_irq(key_dev->irqno, NULL);
 	device_destroy(key_dev->cls, MKDEV(key_dev->dev_major,0));

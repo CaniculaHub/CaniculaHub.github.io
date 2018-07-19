@@ -2,8 +2,7 @@
 
 ROOTFS_DIR = /opt/4412/rootfs
 
-MODULE_NAME = key_drv
-APP_NAME = key_test
+APP_NAME = chr_test
 
 CROSS_COMPILE = /home/george/Linux_4412/toolchain/gcc-4.6.4/bin/arm-none-linux-gnueabi-
 CC = $(CROSS_COMPILE)gcc
@@ -19,15 +18,14 @@ all :
 
 clean :
 	make -C  $(KERNEL_DIR) M=$(CUR_DIR) clean
-	rm -rf $(APP_NAME)	
-
+	
 install:
 	cp -raf *.ko $(APP_NAME)   $(ROOTFS_DIR)/drv_module
 
 
 else
 
-obj-m += $(MODULE_NAME).o
+obj-m += chr_drv.o
 
 
 endif

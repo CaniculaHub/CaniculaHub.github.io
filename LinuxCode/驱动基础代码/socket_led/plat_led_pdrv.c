@@ -5,7 +5,7 @@
 #include <linux/device.h>
 #include <linux/ioport.h>
 #include <linux/platform_device.h>
-
+#include <linux/uaccess.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
 

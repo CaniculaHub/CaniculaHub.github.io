@@ -3,8 +3,7 @@
 #include <linux/device.h>
 #include <linux/io.h>
 #include "dev_info.h"
-#include <linux/device.h>
-#include <linux/mod_devicetable.h>
+
 
 struct mydev_desc  *pdesc;
 
@@ -18,13 +17,6 @@ int mydrv_probe(struct device *dev)
 	printk("irqno = %d\n", pdesc->irqno);
 
 	unsigned long *paddr = ioremap(pdesc->addr, 8);
-
-	platform_device_unregister(struct platform_device * pdev)
-	
-
-	platform_driver_register(struct platform_driver *drv);
-	platform_driver_unregister(struct platform_driver *drv);
-	
 	return 0;
 }
 

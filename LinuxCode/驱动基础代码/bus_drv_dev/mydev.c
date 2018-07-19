@@ -2,8 +2,7 @@
 #include <linux/module.h>
 #include <linux/device.h>
 #include "dev_info.h"
-#include <linux/device.h>
-#include <linux/mod_devicetable.h>
+
 
 extern struct bus_type mybus;
 
@@ -15,14 +14,14 @@ struct mydev_desc devinfo = {
 	.addr = 0x30008000,
 };
 
-void	mydev_release(struct device *dev)
+void mydev_release(struct device *dev)
 {
 
 	printk("----------%s-------------\n", __FUNCTION__);
 }
 
 //构建一个device对象
-struct device  mydev= {
+struct  device  mydev= {
 	.init_name = "fsdev_drv",
 	.bus = &mybus,
 	.release = mydev_release,

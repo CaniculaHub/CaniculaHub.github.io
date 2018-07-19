@@ -2,8 +2,8 @@
 
 ROOTFS_DIR = /opt/4412/rootfs
 
-MODULE_NAME = key_drv
-APP_NAME = key_test
+MODULE_NAME = simple_input
+APP_NAME = simple_input_test
 
 CROSS_COMPILE = /home/george/Linux_4412/toolchain/gcc-4.6.4/bin/arm-none-linux-gnueabi-
 CC = $(CROSS_COMPILE)gcc

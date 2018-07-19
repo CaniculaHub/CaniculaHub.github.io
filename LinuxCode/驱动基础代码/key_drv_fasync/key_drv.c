@@ -31,10 +31,12 @@ struct key_desc{
 	struct key_event event;
 	wait_queue_head_t  wq_head;
 	int key_state; //表示是否有数据
+	struct fasync_struct *faysnc;
 	
 };
 
 struct key_desc *key_dev;
+
 
 irqreturn_t key_irq_handler(int irqno, void *devid)
 {
@@ -57,6 +59,9 @@ irqreturn_t key_irq_handler(int irqno, void *devid)
 	wake_up_interruptible(&key_dev->wq_head);
 	//同时设置标志位
 	key_dev->key_state  = 1;
+
+	//发送信号
+	kill_fasync(&key_dev->faysnc, SIGIO, POLLIN);
 	
 	return IRQ_HANDLED;
 }
@@ -144,12 +149,20 @@ unsigned int key_drv_poll(struct file *filp, struct poll_table_struct *pts)
 	return mask;
 }
 
+int key_drv_fasync(int fd, struct file *filp, int on)
+{
+	//只需要调用一个函数记录信号该发送给谁
+	return fasync_helper(fd, filp, on,  &key_dev->faysnc);
+
+}
+
 const struct file_operations key_fops = {
 	.open = key_drv_open,
 	.read = key_drv_read,
 	.write = key_drv_write,
 	.release = key_drv_close,
 	.poll = key_drv_poll,
+	.fasync = key_drv_fasync,
 	
 };
 

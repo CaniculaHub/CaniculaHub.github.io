@@ -2,6 +2,13 @@
 #include <linux/module.h>
 #include <linux/device.h>
 
+//实例化一个bus对象
+struct bus_type mybus = 
+{
+	.name = "mybus",
+	.match = mybus_match,
+};
+
 
 int mybus_match(struct device *dev, struct device_driver *drv)
 {
@@ -19,12 +26,6 @@ int mybus_match(struct device *dev, struct device_driver *drv)
 	return 0;
 }
 
-
-//实例化一个bus对象
-struct bus_type mybus = {
-	.name = "mybus",
-	.match = mybus_match,
-};
 
 EXPORT_SYMBOL(mybus);
 
